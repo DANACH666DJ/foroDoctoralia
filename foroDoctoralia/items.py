@@ -22,5 +22,7 @@ class ForodoctoraliaItem(scrapy.Item):
     user_answer_name = scrapy.Field()
     user_answer_specialities = scrapy.Field()
     user_answer_city = scrapy.Field()
+    user_answer_url = scrapy.Field()
+    user_answer_num_college = scrapy.Field()
 
     pass

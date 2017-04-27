@@ -4,6 +4,7 @@
     <list default="true" id="63262ce6-545e-45ad-a8ee-9fad7e7b5687" name="Default" comment="">
       <change type="DELETED" beforePath="$PROJECT_DIR$/doc.xml" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/foroDoctoralia/items.py" afterPath="$PROJECT_DIR$/foroDoctoralia/items.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/foroDoctoralia/spiders/foro_doctoralia_spider.py" afterPath="$PROJECT_DIR$/foroDoctoralia/spiders/foro_doctoralia_spider.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,7 +15,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/foroDoctoralia$Unnamed.coverage" NAME="Unnamed Coverage Results" MODIFIED="1493298131544" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/foroDoctoralia/spiders" />
+    <SUITE FILE_PATH="coverage/foroDoctoralia$Unnamed.coverage" NAME="Unnamed Coverage Results" MODIFIED="1493308749923" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/foroDoctoralia/spiders" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
@@ -22,8 +23,8 @@
       <file leaf-file-name="foro_doctoralia_spider.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/foroDoctoralia/spiders/foro_doctoralia_spider.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-571">
-              <caret line="71" column="59" lean-forward="true" selection-start-line="71" selection-start-column="59" selection-end-line="71" selection-end-column="59" />
+            <state relative-caret-position="187">
+              <caret line="20" column="39" lean-forward="true" selection-start-line="20" selection-start-column="39" selection-end-line="20" selection-end-column="39" />
               <folding>
                 <element signature="e#24#39#0" expanded="true" />
               </folding>
@@ -34,8 +35,8 @@
       <file leaf-file-name="doc.xml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/doc.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="214">
-              <caret line="170" column="27" lean-forward="true" selection-start-line="170" selection-start-column="27" selection-end-line="170" selection-end-column="27" />
+            <state relative-caret-position="22576">
+              <caret line="1259" column="86" lean-forward="false" selection-start-line="1259" selection-start-column="29" selection-end-line="1259" selection-end-column="86" />
               <folding />
             </state>
           </provider>
@@ -54,8 +55,8 @@
       <file leaf-file-name="items.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/foroDoctoralia/items.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="20" column="20" lean-forward="false" selection-start-line="20" selection-start-column="20" selection-end-line="20" selection-end-column="20" />
+            <state relative-caret-position="367">
+              <caret line="25" column="44" lean-forward="false" selection-start-line="25" selection-start-column="44" selection-end-line="25" selection-end-column="44" />
               <folding />
             </state>
           </provider>
@@ -73,6 +74,16 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>&quot;me tome 3 nolotiles juntos pasa algo?&quot;</find>
+      <find>Normalmente</find>
+      <find>&quot;¿Puedo</find>
+      <find>No parece</find>
+      <find>&quot;¿La radiofrecuencia</find>
+      <find>&quot;Después de 10 sesiones semanales</find>
+      <find />
+      <find>¿Con que puedo combinar</find>
+      <find>Como servir sirv</find>
+      <find>&quot;¿Enantyum sirve para bajar la fiebre?&quot;</find>
+      <find>¿Enantyum es compatible con medicamentos para la tensión?</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -473,24 +484,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/foroDoctoralia/items.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="20" column="20" lean-forward="false" selection-start-line="20" selection-start-column="20" selection-end-line="20" selection-end-column="20" />
+        <state relative-caret-position="367">
+          <caret line="25" column="44" lean-forward="false" selection-start-line="25" selection-start-column="44" selection-end-line="25" selection-end-column="44" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/doc.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="214">
-          <caret line="170" column="27" lean-forward="true" selection-start-line="170" selection-start-column="27" selection-end-line="170" selection-end-column="27" />
+        <state relative-caret-position="22576">
+          <caret line="1259" column="86" lean-forward="false" selection-start-line="1259" selection-start-column="29" selection-end-line="1259" selection-end-column="86" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/foroDoctoralia/spiders/foro_doctoralia_spider.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-571">
-          <caret line="71" column="59" lean-forward="true" selection-start-line="71" selection-start-column="59" selection-end-line="71" selection-end-column="59" />
+        <state relative-caret-position="187">
+          <caret line="20" column="39" lean-forward="true" selection-start-line="20" selection-start-column="39" selection-end-line="20" selection-end-column="39" />
           <folding>
             <element signature="e#24#39#0" expanded="true" />
           </folding>

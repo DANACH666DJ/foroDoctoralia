@@ -3,7 +3,6 @@ import urlparse
 
 import scrapy
 import sys
-from urllib2 import quote
 
 from urllib2 import quote
 from foroDoctoralia.items import ForodoctoraliaItem
@@ -40,7 +39,10 @@ class foroDoctoraliaSpider(scrapy.Spider):
                     'forum_title': forum_title
                     }
 
-            yield scrapy.Request(forum_url, callback=self.parse_urlsQuestions, meta=meta)
+            # para probar solo con una url de un tema
+            if forum_url == "http://www.doctoralia.es/medicamento/enantyum-1454":
+                yield scrapy.Request(forum_url, callback=self.parse_urlsQuestions, meta=meta)
+
 
     def parse_urlsQuestions(self, response):
         # recibo  el meta
@@ -76,7 +78,7 @@ class foroDoctoraliaSpider(scrapy.Spider):
                 answers_url = urlparse.urljoin(response.url, answers_url)
                 yield scrapy.Request(answers_url, callback=self.parse_data_answers, meta=meta)
             # si no tiene url de más respuestas sacamos los datos de la principal
-            else:
+            if answers_url == None:
                 user_answer_text = item.xpath(
                     ".//following-sibling::div[@class='answer-wrapper']//p[@class='text']/text()").extract_first().strip()
                 user_answer_text = str(user_answer_text)
@@ -87,23 +89,28 @@ class foroDoctoraliaSpider(scrapy.Spider):
                     ".//following-sibling::div[@class='answer-wrapper']/div[@class='doctor']/dl/dd/p[@class='specialities']/text()").extract_first()
                 user_answer_city = item.xpath(
                     ".//following-sibling::div[@class='answer-wrapper']/div[@class='doctor']/dl/dd/p[@class='city']/text()").extract_first()
+                user_answer_url = item.xpath(".//div[@class='doctor']/dl/dd/h3/a/@href").extract_first()
+                user_answer_url = urlparse.urljoin(response.url, user_answer_url)
+
                 meta['user_answer_text'] = user_answer_text
                 meta['user_answer_name'] = user_answer_name
                 meta['user_answer_specialities'] = user_answer_specialities
                 meta['user_answer_city'] = user_answer_city
-                item = ForodoctoraliaItem()
-                item['forum_url'] = meta['forum_url']
-                item['forum_title'] = meta['forum_title']
-                item['post_num_questions'] = meta['post_num_questions']
-                item['post_num_answers'] = meta['post_num_answers']
-                item['post_num_experts_agreement'] = meta['post_num_experts_agreement']
-                item['post_num_patients_grateful'] = meta['post_num_patients_grateful']
-                item['user_question_text'] = meta['user_question_text']
-                item['user_answer_text'] = meta['user_answer_text']
-                item['user_answer_name'] = meta['user_answer_name']
-                item['user_answer_specialities'] = meta['user_answer_specialities']
-                item['user_answer_city'] = meta['user_answer_city']
-                yield item
+                meta['user_answer_url'] = user_answer_url
+                # hacemos otra request con la url del user y le mandamos todos los datos guardados del item
+                if user_answer_url is not None:
+                    yield scrapy.Request(user_answer_url, callback=self.parse_urlUser, meta=meta, dont_filter=True)
+                else:
+                    # si el user no tiene url(es decir no tiene datos),ponemos a null todos y creamos el item ya
+                    meta['user_answer_num_college'] = None
+                    yield self.create_item(meta)
+
+        # paginación de la página de data_answers
+        next_page = response.xpath("//li[@class='paginatorNext']/a/@href").extract_first()
+        next_page = urlparse.urljoin(response.url, next_page)
+        if not next_page is None:
+            yield scrapy.Request(next_page, callback=self.parse_questions, meta=response.meta)
+
 
     def parse_data_answers(self, response):
         meta = response.meta
@@ -115,23 +122,47 @@ class foroDoctoraliaSpider(scrapy.Spider):
                 ".//div[@class='doctor']/dl/dd/p[@class='specialities']/text()").extract_first()
             user_answer_city = item.xpath(
                 ".//div[@class='doctor']/dl/dd/p[@class='city']/text()").extract_first()
+            user_answer_url = item.xpath(".//div[@class='doctor']/dl/dd/h3/a/@href").extract_first()
+            user_answer_url = urlparse.urljoin(response.url, user_answer_url)
             meta['user_answer_text'] = user_answer_text
             meta['user_answer_name'] = user_answer_name
             meta['user_answer_specialities'] = user_answer_specialities
             meta['user_answer_city'] = user_answer_city
-            item = ForodoctoraliaItem()
-            item['forum_url'] = meta['forum_url']
-            item['forum_title'] = meta['forum_title']
-            item['post_num_questions'] = meta['post_num_questions']
-            item['post_num_answers'] = meta['post_num_answers']
-            item['post_num_experts_agreement'] = meta['post_num_experts_agreement']
-            item['post_num_patients_grateful'] = meta['post_num_patients_grateful']
-            item['user_question_text'] = meta['user_question_text']
-            item['user_answer_text'] = meta['user_answer_text']
-            item['user_answer_name'] = meta['user_answer_name']
-            item['user_answer_specialities'] = meta['user_answer_specialities']
-            item['user_answer_city'] = meta['user_answer_city']
-            yield item
+            meta['user_answer_url'] = user_answer_url
+            # hacemos otra request con la url del user y le mandamos todos los datos guardados del item
+            if user_answer_url is not None:
+                yield scrapy.Request(user_answer_url, callback=self.parse_urlUser, meta=meta, dont_filter=True)
+            else:
+                # si el user no tiene url(es decir no tiene datos),ponemos a null todos y creamos el item ya
+                meta['user_answer_num_college'] = None
+                yield self.create_item(meta)
 
 
+    def parse_urlUser(self, response):
+        # recibo los datos
+        meta = response.meta
+        # los inicio a null por si el usuario no tiene los datos
+        meta['user_answer_num_college'] = None
 
+        user_answer_num_college = response.xpath(
+            "//div[@class='header-content']/p[@class='regnum']/text()").extract_first()
+        meta['user_answer_num_college'] = user_answer_num_college
+        yield self.create_item(meta)
+
+    # método para armar el item con los datos que hemos ido añadiendo al meta
+    def create_item(self, meta):
+        item = ForodoctoraliaItem()
+        item['forum_url'] = meta['forum_url']
+        item['forum_title'] = meta['forum_title']
+        item['post_num_questions'] = meta['post_num_questions']
+        item['post_num_answers'] = meta['post_num_answers']
+        item['post_num_experts_agreement'] = meta['post_num_experts_agreement']
+        item['post_num_patients_grateful'] = meta['post_num_patients_grateful']
+        item['user_question_text'] = meta['user_question_text']
+        item['user_answer_text'] = meta['user_answer_text']
+        item['user_answer_name'] = meta['user_answer_name']
+        item['user_answer_specialities'] = meta['user_answer_specialities']
+        item['user_answer_city'] = meta['user_answer_city']
+        item['user_answer_url'] = meta['user_answer_url']
+        item['user_answer_num_college'] = meta['user_answer_num_college']
+        return item
