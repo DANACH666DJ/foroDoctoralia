@@ -64,30 +64,57 @@ class foroDoctoraliaSpider(scrapy.Spider):
 
         userQuest = response.xpath("//div[@class='question']")
         for item in userQuest:
-            answers_url = item.xpath(".//following-sibling::p[@class='goto']/a/@href").extract_first()
-            #comprobamos si la pregunta tiene más respuestas para mandarle al otro enlace
-            if not answers_url == None:
-                answers_url = urlparse.urljoin(response.url, answers_url)
-
-
-
-
             user_question_text = item.xpath(".//following-sibling::a/text()").extract_first().strip()
             # cast de user_question_text a string ,puesto que necesitamos transformarlo a utf-8
             user_question_text = str(user_question_text)
             # transformo el user_question_text a utf8
             user_question_text = unicode(user_question_text, "utf-8")
-            user_answer_text = item.xpath(
-                ".//following-sibling::div[@class='answer-wrapper']//p[@class='text']/text()").extract_first().strip()
-            user_answer_text = str(user_answer_text)
-            user_answer_text = unicode(user_answer_text, "utf-8")
-            user_answer_name = item.xpath(
-                ".//following-sibling::div[@class='answer-wrapper']/div[@class='doctor']/dl/dd/a/text()").extract_first()
-            user_answer_specialities = item.xpath(
-                ".//following-sibling::div[@class='answer-wrapper']/div[@class='doctor']/dl/dd/p[@class='specialities']/text()").extract_first()
-            user_answer_city = item.xpath(
-                ".//following-sibling::div[@class='answer-wrapper']/div[@class='doctor']/dl/dd/p[@class='city']/text()").extract_first()
             meta['user_question_text'] = user_question_text
+            answers_url = item.xpath(".//following-sibling::p[@class='goto']/a/@href").extract_first()
+            # comprobamos si la pregunta tiene más respuestas para mandarle al otro enlace y que recoga los datos
+            if not answers_url == None:
+                answers_url = urlparse.urljoin(response.url, answers_url)
+                yield scrapy.Request(answers_url, callback=self.parse_data_answers, meta=meta)
+            # si no tiene url de más respuestas sacamos los datos de la principal
+            else:
+                user_answer_text = item.xpath(
+                    ".//following-sibling::div[@class='answer-wrapper']//p[@class='text']/text()").extract_first().strip()
+                user_answer_text = str(user_answer_text)
+                user_answer_text = unicode(user_answer_text, "utf-8")
+                user_answer_name = item.xpath(
+                    ".//following-sibling::div[@class='answer-wrapper']/div[@class='doctor']/dl/dd/a/text()").extract_first()
+                user_answer_specialities = item.xpath(
+                    ".//following-sibling::div[@class='answer-wrapper']/div[@class='doctor']/dl/dd/p[@class='specialities']/text()").extract_first()
+                user_answer_city = item.xpath(
+                    ".//following-sibling::div[@class='answer-wrapper']/div[@class='doctor']/dl/dd/p[@class='city']/text()").extract_first()
+                meta['user_answer_text'] = user_answer_text
+                meta['user_answer_name'] = user_answer_name
+                meta['user_answer_specialities'] = user_answer_specialities
+                meta['user_answer_city'] = user_answer_city
+                item = ForodoctoraliaItem()
+                item['forum_url'] = meta['forum_url']
+                item['forum_title'] = meta['forum_title']
+                item['post_num_questions'] = meta['post_num_questions']
+                item['post_num_answers'] = meta['post_num_answers']
+                item['post_num_experts_agreement'] = meta['post_num_experts_agreement']
+                item['post_num_patients_grateful'] = meta['post_num_patients_grateful']
+                item['user_question_text'] = meta['user_question_text']
+                item['user_answer_text'] = meta['user_answer_text']
+                item['user_answer_name'] = meta['user_answer_name']
+                item['user_answer_specialities'] = meta['user_answer_specialities']
+                item['user_answer_city'] = meta['user_answer_city']
+                yield item
+
+    def parse_data_answers(self, response):
+        meta = response.meta
+        userQuest = response.xpath("//div[@class='answer-wrapper']")
+        for item in userQuest:
+            user_answer_text = item.xpath(".//p[@class='text']//text()").extract_first().strip()
+            user_answer_name = item.xpath(".//div[@class='doctor']/dl/dd/h3/a/text()").extract_first()
+            user_answer_specialities = item.xpath(
+                ".//div[@class='doctor']/dl/dd/p[@class='specialities']/text()").extract_first()
+            user_answer_city = item.xpath(
+                ".//div[@class='doctor']/dl/dd/p[@class='city']/text()").extract_first()
             meta['user_answer_text'] = user_answer_text
             meta['user_answer_name'] = user_answer_name
             meta['user_answer_specialities'] = user_answer_specialities
@@ -105,7 +132,6 @@ class foroDoctoraliaSpider(scrapy.Spider):
             item['user_answer_specialities'] = meta['user_answer_specialities']
             item['user_answer_city'] = meta['user_answer_city']
             yield item
-
 
 
 
