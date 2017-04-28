@@ -40,9 +40,8 @@ class foroDoctoraliaSpider(scrapy.Spider):
                     }
 
             # para probar solo con una url de un tema
-            if forum_url == "http://www.doctoralia.es/medicamento/enantyum-1454":
+            if forum_url == "http://www.doctoralia.es/medicamento/amoxicilina-1775":
                 yield scrapy.Request(forum_url, callback=self.parse_urlsQuestions, meta=meta)
-
 
     def parse_urlsQuestions(self, response):
         # recibo  el meta
@@ -82,6 +81,7 @@ class foroDoctoraliaSpider(scrapy.Spider):
                 user_answer_text = item.xpath(
                     ".//following-sibling::div[@class='answer-wrapper']//p[@class='text']/text()").extract_first().strip()
                 user_answer_text = str(user_answer_text)
+                # transformo el user_answer_text a utf8
                 user_answer_text = unicode(user_answer_text, "utf-8")
                 user_answer_name = item.xpath(
                     ".//following-sibling::div[@class='answer-wrapper']/div[@class='doctor']/dl/dd/a/text()").extract_first()
@@ -89,9 +89,10 @@ class foroDoctoraliaSpider(scrapy.Spider):
                     ".//following-sibling::div[@class='answer-wrapper']/div[@class='doctor']/dl/dd/p[@class='specialities']/text()").extract_first()
                 user_answer_city = item.xpath(
                     ".//following-sibling::div[@class='answer-wrapper']/div[@class='doctor']/dl/dd/p[@class='city']/text()").extract_first()
-                user_answer_url = item.xpath(".//div[@class='doctor']/dl/dd/h3/a/@href").extract_first()
+                user_answer_url = item.xpath(
+                    ".//following-sibling::div[@class='answer-wrapper']/div[@class='doctor']/dl/dd/a/@href").extract_first()
                 user_answer_url = urlparse.urljoin(response.url, user_answer_url)
-
+                #print "URLLLLLLLLL***********////////222", user_answer_url
                 meta['user_answer_text'] = user_answer_text
                 meta['user_answer_name'] = user_answer_name
                 meta['user_answer_specialities'] = user_answer_specialities
@@ -111,12 +112,16 @@ class foroDoctoraliaSpider(scrapy.Spider):
         if not next_page is None:
             yield scrapy.Request(next_page, callback=self.parse_questions, meta=response.meta)
 
-
     def parse_data_answers(self, response):
         meta = response.meta
         userQuest = response.xpath("//div[@class='answer-wrapper']")
         for item in userQuest:
-            user_answer_text = item.xpath(".//p[@class='text']//text()").extract_first().strip()
+            user_answer_text = item.xpath(".//p[@class='text']//text()").extract()
+            user_answer_text = self.clean_and_flatten(user_answer_text)
+            # cast de user_answer_text a string ,puesto que necesitamos transformarlo a utf-8
+            user_answer_text = str(user_answer_text)
+            # transformo el user_answer_text a utf8
+            user_answer_text = unicode(user_answer_text, "utf-8")
             user_answer_name = item.xpath(".//div[@class='doctor']/dl/dd/h3/a/text()").extract_first()
             user_answer_specialities = item.xpath(
                 ".//div[@class='doctor']/dl/dd/p[@class='specialities']/text()").extract_first()
@@ -137,7 +142,6 @@ class foroDoctoraliaSpider(scrapy.Spider):
                 meta['user_answer_num_college'] = None
                 yield self.create_item(meta)
 
-
     def parse_urlUser(self, response):
         # recibo los datos
         meta = response.meta
@@ -148,6 +152,17 @@ class foroDoctoraliaSpider(scrapy.Spider):
             "//div[@class='header-content']/p[@class='regnum']/text()").extract_first()
         meta['user_answer_num_college'] = user_answer_num_college
         yield self.create_item(meta)
+
+    # método para eliminar los espacios en blanco de los textos
+    def clean_and_flatten(self, text_list):
+        clean_text = []
+        for text_str in text_list:
+            if text_str == None:
+                continue
+            if len(text_str.strip()) > 0:
+                clean_text.append(text_str.strip())
+
+        return "\n".join(clean_text).strip()
 
     # método para armar el item con los datos que hemos ido añadiendo al meta
     def create_item(self, meta):
