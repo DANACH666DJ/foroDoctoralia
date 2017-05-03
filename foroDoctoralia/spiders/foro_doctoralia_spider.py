@@ -23,12 +23,34 @@ class foroDoctoraliaSpider(scrapy.Spider):
     # método que inicializa la url principal y la manda al método parse
     def start_requests(self):
         urls = 'http://www.doctoralia.es/pregunta-al-experto'
-        yield scrapy.Request(url=urls, callback=self.parse)
+        yield scrapy.Request(url=urls, callback=self.parse_one_url)
 
-    # recibo la url de temas y empiezo el crawl
+    # para coger la url de un medicamento
+    def parse_one_url(self, response):
+        url_one = response.xpath('//section[@class="box askan-themes"]/ol/li/a/@href').extract_first()
+        url = urlparse.urljoin(response.url, url_one)
+        yield scrapy.Request(url, callback=self.parse_url_medic)
+
+    # para coger la url de medicamentos
+    def parse_url_medic(self, response):
+        url_medic = response.xpath(
+            '//div[@class="container fixed"]/ul[@class="breadcrumb"]/li[2]/a/@href').extract_first()
+        url = urlparse.urljoin(response.url, url_medic)
+        yield scrapy.Request(url, callback=self.parse_url_list_alphabetic)
+
+    # para coger todos los medicamentos de la letra A a la Z
+    def parse_url_list_alphabetic(self, response):
+        urls_alphabetic = response.xpath('//nav[@class="abc"]/a')
+        for article in urls_alphabetic:
+            url = urlparse.urljoin(response.url, article.xpath('.//@href').extract_first())
+            #para probar sólo con una letra
+            if url == "http://www.doctoralia.es/medicamentos/a":
+                yield scrapy.Request(url, callback=self.parse)
+
+    # recibo la url de cada letra y empiezo el crawl
     def parse(self, response):
         # creo un xpath que recorre todos los titulos , textos  y url de cada tema
-        items = response.xpath('//section[@class="box askan-themes"]/ol/li')
+        items = response.xpath('//div[@class="filter-full"]/div[@id="resultados"]/ul/li')
         for article in items:
             forum_url = article.xpath('.//a/@href').extract_first()
             forum_title = article.xpath('.//a/text()').extract_first()
@@ -38,17 +60,26 @@ class foroDoctoraliaSpider(scrapy.Spider):
             meta = {'forum_url': forum_url,
                     'forum_title': forum_title
                     }
-
+            yield scrapy.Request(forum_url, callback=self.parse_urlsQuestions, meta=meta)
+            '''
             # para probar solo con una url de un tema
-            if forum_url == "http://www.doctoralia.es/medicamento/amoxicilina-1775":
+            if forum_url == "http://www.doctoralia.es/medicamento/abbottselsun-3737":
                 yield scrapy.Request(forum_url, callback=self.parse_urlsQuestions, meta=meta)
+            '''
+        # paginación de la página de alphabetic
+        next_page = response.xpath(
+            '//div[@class="paging"]//li[@class="active"]/following-sibling::li/a/@href').extract_first()
+        next_page = urlparse.urljoin(response.url, next_page)
+        if not next_page is None:
+            yield scrapy.Request(next_page, callback=self.parse, meta=response.meta)
 
     def parse_urlsQuestions(self, response):
         # recibo  el meta
         meta = response.meta
         urlQuestion = urlparse.urljoin(response.url,
                                        response.xpath('//p[@class="goto no-icon"]/a/@href').extract_first())
-        yield scrapy.Request(urlQuestion, callback=self.parse_questions, meta=meta)
+        if not urlQuestion == None:
+            yield scrapy.Request(urlQuestion, callback=self.parse_questions, meta=meta)
 
     # método que lee cada url del método parse y la recorre para extraer subject_title y  subject_user(se le manda por meta los datos de parse)
     def parse_questions(self, response):
@@ -92,7 +123,7 @@ class foroDoctoraliaSpider(scrapy.Spider):
                 user_answer_url = item.xpath(
                     ".//following-sibling::div[@class='answer-wrapper']/div[@class='doctor']/dl/dd/a/@href").extract_first()
                 user_answer_url = urlparse.urljoin(response.url, user_answer_url)
-                #print "URLLLLLLLLL***********////////222", user_answer_url
+                # print "URLLLLLLLLL***********////////222", user_answer_url
                 meta['user_answer_text'] = user_answer_text
                 meta['user_answer_name'] = user_answer_name
                 meta['user_answer_specialities'] = user_answer_specialities
