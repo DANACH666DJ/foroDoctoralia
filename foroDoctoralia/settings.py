@@ -21,6 +21,7 @@ NEWSPIDER_MODULE = 'foroDoctoralia.spiders'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
+
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 

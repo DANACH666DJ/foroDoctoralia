@@ -60,12 +60,12 @@ class foroDoctoraliaSpider(scrapy.Spider):
             meta = {'forum_url': forum_url,
                     'forum_title': forum_title
                     }
-            yield scrapy.Request(forum_url, callback=self.parse_urlsQuestions, meta=meta)
-            '''
+
             # para probar solo con una url de un tema
-            if forum_url == "http://www.doctoralia.es/medicamento/abbottselsun-3737":
-                yield scrapy.Request(forum_url, callback=self.parse_urlsQuestions, meta=meta)
-            '''
+            if forum_url == "http://www.doctoralia.es/medicamento/amoxicilina-1775":
+                print "ENANTYYYUMM",forum_url
+                yield scrapy.Request(forum_url, callback=self.parse_urlsQuestions, meta=meta, dont_filter=True)
+
         # paginación de la página de alphabetic
         next_page = response.xpath(
             '//div[@class="paging"]//li[@class="active"]/following-sibling::li/a/@href').extract_first()
