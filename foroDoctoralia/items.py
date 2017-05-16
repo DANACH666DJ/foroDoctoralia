@@ -13,6 +13,7 @@ class ForodoctoraliaItem(scrapy.Item):
     # name = scrapy.Field()
     forum_url = scrapy.Field()
     forum_title = scrapy.Field()
+    unique_id_medicament = scrapy.Field()
     post_num_questions = scrapy.Field()
     post_num_answers = scrapy.Field()
     post_num_experts_agreement = scrapy.Field()

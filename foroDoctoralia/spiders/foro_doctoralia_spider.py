@@ -3,6 +3,7 @@ import urlparse
 
 import scrapy
 import sys
+import uuid
 
 from urllib2 import quote
 from foroDoctoralia.items import ForodoctoraliaItem
@@ -44,7 +45,7 @@ class foroDoctoraliaSpider(scrapy.Spider):
         for article in urls_alphabetic:
             url = urlparse.urljoin(response.url, article.xpath('.//@href').extract_first())
             #para probar sólo con una letra
-            if url == "http://www.doctoralia.es/medicamentos/a":
+            if url == "http://www.doctoralia.es/medicamentos/z":
                 yield scrapy.Request(url, callback=self.parse)
 
     # recibo la url de cada letra y empiezo el crawl
@@ -57,14 +58,18 @@ class foroDoctoraliaSpider(scrapy.Spider):
             # este paso se hace puesto que la url no nos devuelve la url completa y debemos hacer un join con el response url
             forum_url = urlparse.urljoin(response.url, article.xpath('.//a/@href').extract_first())
             # creo un meta para ir insertando nuestros datos
+            unique_id_medicament = uuid.uuid4()
             meta = {'forum_url': forum_url,
-                    'forum_title': forum_title
+                    'forum_title': forum_title,
+                    'unique_id_medicament': unique_id_medicament
                     }
-
+            yield scrapy.Request(forum_url, callback=self.parse_urlsQuestions, meta=meta, dont_filter=True)
+            '''
             # para probar solo con una url de un tema
-            if forum_url == "http://www.doctoralia.es/medicamento/amoxicilina-1775":
-                print "ENANTYYYUMM",forum_url
+            if forum_url == "http://www.doctoralia.es/medicamento/zaditen-1396":
+                print "ENANTYYYUMM", forum_url
                 yield scrapy.Request(forum_url, callback=self.parse_urlsQuestions, meta=meta, dont_filter=True)
+            '''
 
         # paginación de la página de alphabetic
         next_page = response.xpath(
@@ -200,6 +205,7 @@ class foroDoctoraliaSpider(scrapy.Spider):
         item = ForodoctoraliaItem()
         item['forum_url'] = meta['forum_url']
         item['forum_title'] = meta['forum_title']
+        item['unique_id_medicament'] = meta['unique_id_medicament']
         item['post_num_questions'] = meta['post_num_questions']
         item['post_num_answers'] = meta['post_num_answers']
         item['post_num_experts_agreement'] = meta['post_num_experts_agreement']
